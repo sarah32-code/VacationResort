@@ -1,75 +1,77 @@
-const inputName = document.getElementById("Name");
-const inputEmail = document.getElementById("Email");
-const inputPickupDate = document.getElementById("inputPickupDate");
-const inputNumOfNights = document.getElementById("inputNumOfNights");
-const inputRoomType = document.getElementsByName("roomType");
-const inputNumAdults = document.getElementById("numAdults");
-const inputNumChildren = document.getElementById("numChildren");
-const inputDiscount = document.getElementsByName("Discount");
+"use strict";
 
-const outputOriginalRoomCost = document.getElementById("outputOriginalRoomCost");
-const outputDiscount = document.getElementById("outputDiscount");
-const outputDiscountedRoomCost = document.getElementById("outputDiscountedRoomCost");
-const outputTax = document.getElementById("outputTax");
-const outputTotalDue = document.getElementById("outputTotalDue");
+const nameTextBox = document.getElementById("Name");
+const emailTextBox = document.getElementById("Email");
+const checkInDateBox = document.getElementById("inputPickupDate");
+const numberOfDaysNumberBox = document.getElementById("inputNumOfNights");
+const numberOfAdultsNumberBox = document.getElementById("numAdults");
+const numberOfChildrenNumberBox = document.getElementById("numChildren");
+const queenRadioButton = document.getElementById("Queen");
+const kingRadioButton = document.getElementById("King");
+const TwoBedroomRadioButton = document.getElementById("TwoBedroomSuite");
+const seniorDiscountRadioButton = document.getElementById("AAA/Senior");
+const militaryDiscountRadioButton = document.getElementById("Military");
+const submitButton = document.getElementById("overnightCostForm");
+const originalRoomCostOutput = document.getElementById("outputOriginalRoomCost");
+const discountOutput = document.getElementById("outputDiscount");
+const discountedRoomCostOutput = document.getElementById("outputDiscountedRoomCost");
+const taxOutput = document.getElementById("outputTax");
+const totalStayCostOutput = document.getElementById("outputTotalDue");
 
-const overnightCostForm = document.getElementById("overnightCostForm");
-
-overnightCostForm.addEventListener("submit", function (event) {
+submitButton.addEventListener("submit", function (event) {
     event.preventDefault();
 
-    const name = inputName.value;
-    const email = inputEmail.value;
-    const pickupDate = inputPickupDate.value;
-    const numOfNights = parseInt(inputNumOfNights.value);
-    let roomRate = getRoomRate(pickupDate, getSelectedRoomType());
-    const numAdults = parseInt(inputNumAdults.value);
-    const numChildren = parseInt(inputNumChildren.value);
-    const discount = getSelectedDiscount();
+    let numberOfDays = parseInt(numberOfDaysNumberBox.value);
+    let discount = 0;
+    let checkInDate = new Date(checkInDateBox.value.replace(/-/g, "/"));
+    let checkInMonth = checkInDate.getMonth() + 1;
 
-    const originalRoomCost = roomRate * numOfNights;
+    let roomRate;
+    let roomCost;
+    let discountedRoomCost;
+    let totalStayCost;
+    let tax;
 
-    let discountAmount = 0;
-    if (discount === "AAA/Senior") {
-        discountAmount = originalRoomCost * 0.10;
-    } else if (discount === "Military") {
-        discountAmount = originalRoomCost * 0.20;
+    const TAX_RATE = 0.12;
+
+    if (queenRadioButton.checked) {
+        roomRate = getRoomRate(checkInMonth, "Queen");
+    } else if (kingRadioButton.checked) {
+        roomRate = getRoomRate(checkInMonth, "King");
+    } else if (TwoBedroomRadioButton.checked) {
+        roomRate = getRoomRate(checkInMonth, "TwoBedroom");
     }
 
-    const discountedRoomCost = originalRoomCost - discountAmount;
+    if (seniorDiscountRadioButton.checked) {
+        discount = 0.1;
+    } else if (militaryDiscountRadioButton.checked) {
+        discount = 0.2;
+    }
 
-    const tax = discountedRoomCost * 0.12;
+    roomCost = roomRate * numberOfDays;
+    discountedRoomCost = roomCost - (roomCost * discount);
+    tax = discountedRoomCost * TAX_RATE;
+    totalStayCost = discountedRoomCost + tax;
 
-    const totalDue = discountedRoomCost + tax;
-
-    outputOriginalRoomCost.textContent = originalRoomCost.toFixed(2);
-    outputDiscount.textContent = discountAmount.toFixed(2);
-    outputDiscountedRoomCost.textContent = discountedRoomCost.toFixed(2);
-    outputTax.textContent = tax.toFixed(2);
-    outputTotalDue.textContent = totalDue.toFixed(2);
+    originalRoomCostOutput.textContent = roomCost.toFixed(2);
+    discountOutput.textContent = (discount * 100).toFixed(0);
+    discountedRoomCostOutput.textContent = discountedRoomCost.toFixed(2);
+    taxOutput.textContent = tax.toFixed(2);
+    totalStayCostOutput.textContent = totalStayCost.toFixed(2);
 });
 
-function getSelectedRoomType() {
-        const inputRoomType = document.getElementsByName("roomType");
-        if (inputRoomType[0].checked) {
-            return inputRoomType[0].id;
-        } else if (inputRoomType[1].checked) {
-            return inputRoomType[1].id;
-        } else if (inputRoomType[2].checked) {
-            return inputRoomType[2].id;
+function getRoomRate(checkInMonth, roomType) {
+    if (roomType === "Queen" || roomType === "King") {
+        if (checkInMonth >= 6 && checkInMonth <= 8) {
+            return 250;
+        } else {
+            return 150;
+        }
+    } else if (roomType === "TwoBedroomSuite") {
+        if (checkInMonth >= 6 && checkInMonth <= 8) {
+            return 350;
+        } else {
+            return 210;
         }
     }
-
-
-function getSelectedDiscount() {
-    const inputDiscount = document.getElementsByName("Discount");
-    if (inputDiscount[0].checked) {
-        return inputDiscount[0].id;
-    } else if (inputDiscount[1].checked) {
-        return inputDiscount[1].id;
-    }
-}
-
-function getRoomRate(checkInDate, roomType) {
-    return 150.00;
 }
